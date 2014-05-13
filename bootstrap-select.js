@@ -40,6 +40,7 @@
         this.setStyle = Selectpicker.prototype.setStyle;
         this.selectAll = Selectpicker.prototype.selectAll;
         this.deselectAll = Selectpicker.prototype.deselectAll;
+        this.toggleAll = Selectpicker.prototype.toggleAll;
         this.init();
     };
 
@@ -718,6 +719,18 @@
             this.$element.find('option:enabled').prop('selected', false);
             $(this.$lis).filter(':not(.disabled)').removeClass('selected');
             this.render(false);
+        },
+
+        toggleAll: function() {
+            if (this.$lis == null) this.$lis = this.$menu.find('li');
+            this.$element.find('option').each(function() {
+                if($(this).prop('selected'))
+                    $(this).prop('selected', false);
+                else
+                    $(this).prop('selected', true);
+                $(this.$lis).toggleClass('selected');
+            });
+            this.render(true);
         },
 
         keydown: function(e) {
