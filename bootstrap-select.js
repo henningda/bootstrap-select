@@ -120,6 +120,11 @@
             var $drop = this.createDropdown();
             var $li = this.createLi();
             $drop.find('ul').append($li);
+            var that=this;
+            $drop.find('.toggleAll').on('click', function(e) {
+                that.toggleAll();
+                e.stopPropagation();
+            });
             return $drop;
         },
 
@@ -129,6 +134,11 @@
             //Re build
             var $li = this.createLi();
             this.$menu.find('ul').append( $li );
+            var that=this;
+            this.$menu.find('.toggleAll').on('click', function(e) {
+                that.toggleAll();
+                e.stopPropagation();
+            });
         },
 
         destroyLi: function() {
@@ -139,6 +149,11 @@
             var that = this,
                 _liA = [],
                 _liHtml = '';
+
+            if (that.options.showToggleAll)
+            {
+                _liHtml += '<li rel="-1" data-hidden="true" class="toggleAll"><a><span class="text">Toggle All</span></a></li>';
+            }
 
             this.$element.find('option').each(function() {
                 var $this = $(this);
@@ -458,8 +473,12 @@
         },
 
         setSelected: function(index, selected) {
-            if (this.$lis == null) this.$lis = this.$menu.find('li');
-            $(this.$lis[index]).toggleClass('selected', selected);
+            if(index != -1) {
+                if (this.$lis == null) this.$lis = this.$menu.find('li');
+                if (this.options.showToggleAll)
+                    index++;
+                $(this.$lis[index]).toggleClass('selected', selected);
+            }
         },
 
         setDisabled: function(index, disabled) {
@@ -518,10 +537,13 @@
                 }
             });
 
-            this.$menu.on('click', 'li a', function(e) {
+            this.$menu.on('click', 'li:not([data-hidden="true"]) a', function(e) {
                 var clickedIndex = $(this).parent().index(),
                     prevValue = that.$element.val(),
                     prevIndex = that.$element.prop('selectedIndex');
+
+                if (that.options.showToggleAll)
+                    clickedIndex--;
 
                 //Dont close on multi choice menu
                 if (that.multiple) {
@@ -723,12 +745,11 @@
 
         toggleAll: function() {
             if (this.$lis == null) this.$lis = this.$menu.find('li');
-            this.$element.find('option').each(function() {
+            this.$element.find('option:not([data-divider="true"]):not([data-hidden="true"]):not(.disabled)').each(function() {
                 if($(this).prop('selected'))
                     $(this).prop('selected', false);
                 else
                     $(this).prop('selected', true);
-                $(this.$lis).toggleClass('selected');
             });
             this.render(true);
         },
@@ -964,6 +985,7 @@
         width: false,
         container: false,
         hideDisabled: false,
+        showToggleAll: false,
         showSubtext: false,
         showIcon: true,
         showContent: true,
